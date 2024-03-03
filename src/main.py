@@ -107,4 +107,24 @@ async def dont_be_like_this(ctx: discord.ApplicationContext, message: discord.Me
             print(f"Failed to clown on {message.author.name} in {message.guild.name} ({message.guild.id})")
             print(e)
 
+@bot.user_command(name="Clown Record")
+@discord.default_permissions(manage_messages=True)
+async def clown_record(ctx: discord.ApplicationContext, user: discord.User):
+    if ctx.guild is None:
+        return await ctx.send_response(f"You cannot use this command in DMs!", ephemeral=True)
+    
+    clown_record = ClownRecord.select().where(ClownRecord.ServerID == ctx.guild.id, ClownRecord.UserID == user.id)
+    if clown_record.count() == 0:
+        return await ctx.send_response(f"<@{user.id}> has not been clowned on yet!", ephemeral=True)
+    
+    # round the timestamp to the nearest second
+    timestamp = lambda x: int(x)
+
+    clown_record = [f"<t:{int(record.DateOfBeingClowned)}:R> | [Jump](https://discord.com/channels/{ctx.guild.id}/{record.MessageChannelID}/{record.MessageID})" for record in clown_record]
+    message_content = f"Clown Record for <@{user.id}>\n\n" + "\n".join(clown_record)
+
+    if len(message_content) > 2000:
+        return await ctx.send_response(f"😐 Uh oh, I won't be able to send this message since it's too long (> 2000 characters)... <@{user.id}> must've been clowned on a lot! 😳")
+
+    await ctx.send_response(message_content, ephemeral=True)
 bot.run(discord_token)
