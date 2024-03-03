@@ -118,9 +118,6 @@ async def clown_record(ctx: discord.ApplicationContext, user: discord.User):
     clown_record = ClownRecord.select().where(ClownRecord.ServerID == ctx.guild.id, ClownRecord.UserID == user.id)
     if clown_record.count() == 0:
         return await ctx.send_response(f"<@{user.id}> has not been clowned on yet!", ephemeral=True)
-    
-    # round the timestamp to the nearest second
-    timestamp = lambda x: int(x)
 
     clown_record = [f"<t:{int(record.DateOfBeingClowned)}:R> | [Jump](https://discord.com/channels/{ctx.guild.id}/{record.MessageChannelID}/{record.MessageID})" for record in clown_record]
     message_content = f"**Clown Record for <@{user.id}>**\n\n" + "\n".join(clown_record)
