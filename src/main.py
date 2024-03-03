@@ -99,7 +99,7 @@ async def dont_be_like_this(ctx: discord.ApplicationContext, message: discord.Me
         
         try:
             webhook_message = await webhook.send(content=webhook_content, username=f'🤡 {message.author.name}', avatar_url=message.author.avatar.url, allowed_mentions=discord.AllowedMentions.none(), files=message_attachments, wait=True)
-            await ctx.respond(f"🤡 Successfully clowned <@{message.author.id}>")
+            await ctx.respond(f"🤡 Successfully clowned <@{message.author.id}>- https://discord.com/channels/{message.guild.id}/{webhook_message.channel.id}/{webhook_message.id}", ephemeral=True)
             with db.atomic() as txn:
                 ClownRecord.create(MessageID=message.id, MessageChannelID=message.channel.id, ServerID=message.guild.id, UserID=message.author.id, DateOfBeingClowned=int(webhook_message.created_at.timestamp()))
         except Exception as e:
