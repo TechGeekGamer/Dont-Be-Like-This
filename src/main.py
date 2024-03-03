@@ -98,10 +98,10 @@ async def dont_be_like_this(ctx: discord.ApplicationContext, message: discord.Me
         webhook = discord.Webhook.from_url(webhook_url, session=session)
         
         try:
-            await webhook.send(content=webhook_content, username=f'🤡 {message.author.name}', avatar_url=message.author.avatar.url, allowed_mentions=discord.AllowedMentions.none(), files=message_attachments)
+            webhook_message = await webhook.send(content=webhook_content, username=f'🤡 {message.author.name}', avatar_url=message.author.avatar.url, allowed_mentions=discord.AllowedMentions.none(), files=message_attachments, wait=True)
             await ctx.respond(f"🤡 Successfully clowned <@{message.author.id}>")
             with db.atomic() :
-                ClownRecord.create(MessageID=message.id, MessageChannelID=message.channel.id, ServerID=message.guild.id, UserID=message.author.id, DateOfBeingClowned=int(message.created_at.timestamp()))
+                ClownRecord.create(MessageID=message.id, MessageChannelID=message.channel.id, ServerID=message.guild.id, UserID=message.author.id, DateOfBeingClowned=int(webhook_message.created_at.timestamp()))
         except Exception as e:
 
             await ctx.respond(f"😭 Failed to clown <@{message.author.id}>... if this keeps happening, please contact the bot owner", ephemeral=True)
@@ -122,8 +122,8 @@ async def clown_record(ctx: discord.ApplicationContext, user: discord.User):
     # round the timestamp to the nearest second
     timestamp = lambda x: int(x)
 
-    clown_record = [f"<t:{record.DateOfBeingClowned}:R> | [Jump](https://discord.com/channels/{ctx.guild.id}/{record.MessageChannelID}/{record.MessageID})" for record in clown_record]
-    message_content = f"Clown Record for <@{user.id}>\n\n" + "\n".join(clown_record)
+    clown_record = [f"<t:{int(record.DateOfBeingClowned)}:R> | [Jump](https://discord.com/channels/{ctx.guild.id}/{record.MessageChannelID}/{record.MessageID})" for record in clown_record]
+    message_content = f"**Clown Record for <@{user.id}>**\n\n" + "\n".join(clown_record)
 
     if len(message_content) > 2000:
         return await ctx.send_response(f"😐 Uh oh, I won't be able to send this message since it's too long (> 2000 characters)... <@{user.id}> must've been clowned on a lot! 😳")
